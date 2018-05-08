@@ -1,0 +1,155 @@
+  const {Writable} = require("stream"),
+
+module.exports = class CaptureStream extends Writable {
+
+  super("")
+
+}
+
+module.exports = (options) => {
+  const PIX_SIZE = 4
+  let WIDTH = 480
+  let HEIGHT = 360
+  let SIZE = WIDTH * HEIGHT * PIX_SIZE
+
+  const MIN_TIME = 30
+  const MAX_TIME = 120
+  const FORCE_WIDTH = config.width || WIDTH
+  const FORCE_HEIGHT = config.height || HEIGHT
+
+  const filesArray = readDir.readSync(
+    config.dir || __dirname,
+    config.formats || ["**.mp4"],//, "**.3gp"
+    readDir.ABSOLUTE_PATHS
+  )
+  console.log(filesArray)
+  let _fileIndex = 0
+
+  const toArrayBuffer = require("to-array-buffer")
+  const tou8 = require("buffer-to-uint8array")
+    util = require("util")
+
+  const WriteStream = function() {
+    Writable.call(this, "binary")
+  }
+  util.inherits(WriteStream, Writable)
+
+  let ffmpegCommand
+  let _length = 0
+  const _frameBuffers = []
+
+  function updateDimensions({ width, height }) {
+    WIDTH =  width
+    HEIGHT =  height
+    SIZE = WIDTH * HEIGHT * PIX_SIZE
+
+    console.log(Colors.yellow(`WIDTH ${WIDTH}`));
+    console.log(Colors.yellow(`HEIGHT ${HEIGHT}`));
+  }
+
+  WriteStream.prototype._write = function(chunk, encoding, callback) {
+    _length += chunk.length
+    if (_length % SIZE === 0) {
+      videoTexture({
+        format: "rgba",
+        width: WIDTH,
+        height: HEIGHT,
+        type: "uint8",
+        mag: "nearest",
+        min: "nearest",
+        wrapS: "clamp",
+        wrapT: "clamp",
+        data: tou8(Buffer.concat(_frameBuffers, SIZE)),
+      })
+      _length = 0
+      _frameBuffers.length = 0
+    } else {
+      _frameBuffers.push(chunk)
+    }
+    callback()
+  }
+
+  const getVideoData = videoPath => {
+    const child = spawn(`ffprobe`, [
+      `-print_format`,
+      `json`,
+      `-show_format`,
+      `-show_streams`,
+      `-count_frames`,
+      `${videoPath}`,
+    ])
+    const stdout = child.stdout.toString("utf-8")
+    const json = JSON.parse(stdout).streams
+    if (!json) return {}
+    return {
+      duration: Math.round(eval(json[0].duration)),
+      width: Math.round(eval(json[0].width)),
+      height: Math.round(eval(json[0].height)),
+    }
+  }
+
+  function _startTimer() {
+    const _playDuration =
+      Math.random() * (MAX_TIME - MIN_TIME) * 1000 + MIN_TIME * 1000
+    let _to = setTimeout(() => {
+      //_playNextVideo()
+    }, _playDuration)
+    console.log(Colors.green(`_playDuration ${_playDuration}`))
+    return {
+      playDuration: _playDuration,
+      timeout: _to,
+    }
+  }
+
+  let ostream
+  function setFfmpegCommand(src){
+    ffmpegCommand = play(src)
+    ffmpegCommand.pipe(ostream, { end: true })
+  }
+
+  function _playNextVideo() {
+    if (ffmpegCommand && ffmpegCommand.kill) {
+      //console.log(Colors.red(`Killed command`));
+    }
+    _fileIndex = (_fileIndex + 1) % filesArray.length
+    setFfmpegCommand(sample(filesArray))
+  }
+
+  function play(src) {
+    ostream = new WriteStream()
+    const data = getVideoData(src)
+    console.log(data)
+    updateDimensions(data)
+    const {playDuration, timeout} = _startTimer()
+    const _startTime = Math.max(
+      Math.round(
+        Math.random() * (data.duration - playDuration / 1000)
+      ),
+      0
+    )
+    console.log(Colors.green(`_startTime ${_startTime}`))
+    console.log(Colors.green(`${src}`));
+    const command = fluentFF(`${src}`)
+      //.inputOptions("-ss", _startTime)
+      .native()
+      .format("image2pipe")
+      .videoCodec("rawvideo")
+      //.size(`${WIDTH}:`) // HACK
+      .outputOptions("-y", "-pix_fmt", "rgba", "-an", "-safe", "0")
+      .on("start", function(err) {
+        console.log(err)
+      })
+      .on("error", function(err) {
+        console.log("An error occurred: " + err.message)
+      })
+      .on("end", function() {
+        ostream = null
+        console.log(Colors.red("Processing finished !"))
+        clearTimeout(timeout)
+        //_playNextVideo()
+      })
+    return command
+  }
+
+  setFfmpegCommand(sample(filesArray))
+}
