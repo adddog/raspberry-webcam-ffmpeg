@@ -37,18 +37,19 @@ server(
  *
  ************** */
 
-const USE_OMX = false
-const USE_FFPLAY = true
+const USE_OMX = true
+const USE_FFPLAY = false
+const USE_UDP = "udp://192.168.1.134:3333"
 
 const OMX =
-  "omxplayer -b -r --no-keys -s -I -z --timeout 60 --live -o hdmi  pipe:0"
-const FFPLAY = "ffplay -"
-const ffoutput = USE_OMX ? OMX : USE_FFPLAY ? FFPLAY : ""
+  "- | omxplayer -b -r -g --no-keys -s -I -z --timeout 60 -o hdmi --fps 1 pipe:0"
+const FFPLAY = "- | ffplay -"
+const ffoutput = USE_OMX ? OMX : USE_FFPLAY ? FFPLAY : USE_UDP;
 
 const CONFIG = {
   width: 480,
   height: 360,
-  fps: 30,
+  fps: 1,
 }
 const IMG_COMMAND = [
   "-depth",
@@ -71,7 +72,7 @@ const output = Output({
     "rgba",
     "-s",
     `${CONFIG.width}x${CONFIG.height}`,
-    "-r",
+    "-framerate",
     CONFIG.fps,
   ],
   output: [
@@ -80,7 +81,7 @@ const output = Output({
     "-preset",
     "ultrafast",
     "-r",
-    CONFIG.fps,
+    "30",
     "-tune",
     "zerolatency",
     "-c:v",
@@ -96,14 +97,12 @@ const output = Output({
     "-bufsize",
     "1200k",
     "-an",
-    "-analyzeduration",
-    "1024",
-    "-probesize",
-    "512",
+    //"-analyzeduration",
+    //"1024",
+    //"-probesize",
+    //"512",
     "-f",
-    "mpegts",
-    "-",
-    "|",
+    "m4v",
     ...ffoutput.split(" "),
   ],
 })
