@@ -33,22 +33,22 @@ server(
   })
 )
 
-/* **************
-*
-************** */
+/***************
+ *
+ ************** */
 
 const USE_OMX = false
 const USE_FFPLAY = true
 
-const OMX = "omxplayer -b -r --no-keys -s -I -z --timeout 60 --live -o hdmi  pipe:0"
+const OMX =
+  "omxplayer -b -r --no-keys -s -I -z --timeout 60 --live -o hdmi  pipe:0"
 const FFPLAY = "ffplay -"
 const ffoutput = USE_OMX ? OMX : USE_FFPLAY ? FFPLAY : ""
-
 
 const CONFIG = {
   width: 480,
   height: 360,
-  fps: 18
+  fps: 30,
 }
 const IMG_COMMAND = [
   "-depth",
@@ -62,16 +62,31 @@ const IMG_COMMAND = [
 let _converting = false
 const gl = GL(CONFIG)
 const output = Output({
-  input: ["-f", "image2pipe", "-framerate", CONFIG.fps, "-vcodec", "mjpeg"],
+  input: [
+    "-f",
+    "rawvideo",
+    "-vcodec",
+    "rawvideo",
+    "-pix_fmt",
+    "rgba",
+    "-s",
+    `${CONFIG.width}x${CONFIG.height}`,
+    "-r",
+    CONFIG.fps,
+  ],
   output: [
     "-movflags",
     "+faststart",
     "-preset",
     "ultrafast",
+    "-r",
+    CONFIG.fps,
     "-tune",
     "zerolatency",
     "-c:v",
     "libx264",
+    "-pix_fmt",
+    "yuv420p",
     "-b:v",
     "600k",
     "-minrate",
@@ -89,18 +104,17 @@ const output = Output({
     "mpegts",
     "-",
     "|",
-    ...(ffoutput.split(" "))
+    ...ffoutput.split(" "),
   ],
 })
 const camera = Camera(gl, {
+  fps: 6,
   onFrame: buffer => {
-    if (!_converting) {
       _converting = true
-      IM.convert(buffer, IMG_COMMAND, imageBuffer => {
-        output.frame(imageBuffer)
+      output.frame(buffer)
+      /*IM.convert(buffer, IMG_COMMAND, imageBuffer => {
         _converting = false
-      })
-    }
+      })*/
   },
 })
 camera.play("http://192.168.1.154:8080/video.jpeg")
