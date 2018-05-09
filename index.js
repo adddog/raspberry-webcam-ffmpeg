@@ -40,16 +40,16 @@ server(
 const USE_OMX = true
 const USE_FFPLAY = false
 const USE_UDP = "udp://192.168.1.134:3333"
-
-const OMX =
-  "- | omxplayer -b -r -g --no-keys -s -I -z --timeout 60 -o hdmi --fps 1 pipe:0"
+const OMX = `- | mplayer -fps 30 -aspect 16:9 -fs -zoom -cache 1024 -`
+//const OMX =
+ // "- | omxplayer -b -r -g --no-keys -s -I -z --timeout 60 -o hdmi --fps 1 pipe:0"
 const FFPLAY = "- | ffplay -"
 const ffoutput = USE_OMX ? OMX : USE_FFPLAY ? FFPLAY : USE_UDP;
 
 const CONFIG = {
   width: 480,
   height: 360,
-  fps: 1,
+  fps: 2,
 }
 const IMG_COMMAND = [
   "-depth",
