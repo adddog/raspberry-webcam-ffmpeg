@@ -37,19 +37,21 @@ server(
  *
  ************** */
 
-const USE_OMX = false
-const USE_FFPLAY = true
-
-const OMX =
-  "omxplayer -b -r --no-keys -s -I -z --timeout 60 --live -o hdmi  pipe:0"
-const FFPLAY = "ffplay -"
-const ffoutput = USE_OMX ? OMX : USE_FFPLAY ? FFPLAY : ""
+const USE_OMX = true
+const USE_FFPLAY = false//true
 
 const CONFIG = {
   width: 480,
   height: 360,
-  fps: 30,
+  fps: 1,
 }
+
+const OMX =
+  `omxplayer -b -r --no-keys -s -I -z --timeout 60 --live --fps ${CONFIG.fps} -o hdmi  pipe:0`
+const FFPLAY = "ffplay -"
+const ffoutput = USE_OMX ? OMX : USE_FFPLAY ? FFPLAY : ""
+
+
 const IMG_COMMAND = [
   "-depth",
   "8",
@@ -96,10 +98,10 @@ const output = Output({
     "-bufsize",
     "1200k",
     "-an",
-    "-analyzeduration",
-    "1024",
-    "-probesize",
-    "512",
+   // "-analyzeduration",
+   // "1024",
+   // "-probesize",
+    // "512",
     "-f",
     "mpegts",
     "-",
@@ -108,13 +110,14 @@ const output = Output({
   ],
 })
 const camera = Camera(gl, {
-  fps: 6,
+  fps: 4,
   onFrame: buffer => {
       _converting = true
+console.log(buffer.length)
       output.frame(buffer)
       /*IM.convert(buffer, IMG_COMMAND, imageBuffer => {
         _converting = false
       })*/
   },
 })
-camera.play("http://192.168.1.154:8080/video.jpeg")
+camera.play("http://192.168.1.159:8080/video.jpeg")
