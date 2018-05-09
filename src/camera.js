@@ -13,7 +13,7 @@ module.exports = (gl, options = {}) => {
 
   class WriteStream extends Writable {
     constructor() {
-      super("binary")
+      super("ascii")
       this._totalLength = 0
       this._frameBuffers = []
     }
@@ -30,15 +30,13 @@ module.exports = (gl, options = {}) => {
           min: "nearest",
           wrapS: "clamp",
           wrapT: "clamp",
-          data: Uint8Array.from(
-            Buffer.concat(this._frameBuffers, SIZE)
-          ),
+          data: Buffer.concat(this._frameBuffers, SIZE)
         })
         gl.drawSingle({
           tex0: videoTexture,
         })
         if (options.onFrame) {
-          options.onFrame(Buffer.from(gl.read(SIZE)))
+          options.onFrame(gl.read(SIZE))
         }
         this._totalLength = 0
         this._frameBuffers.length = 0

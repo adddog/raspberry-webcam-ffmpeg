@@ -90,6 +90,8 @@ const output = Output({
     "yuv420p",
     "-b:v",
     "600k",
+    "-crf",
+    "30",
     "-minrate",
     "300k",
     "-maxrate",
