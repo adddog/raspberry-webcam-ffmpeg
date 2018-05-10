@@ -1,3 +1,4 @@
+const { PerformanceObserver, performance } = require('perf_hooks');
 const { Writable } = require("stream")
 const fluentFF = require("fluent-ffmpeg")
 
@@ -10,7 +11,7 @@ module.exports = (gl, options = {}) => {
 
   const videoTexture = gl.createTexture()
 
-
+var _t1 =  performance.now()
   class WriteStream extends Writable {
     constructor() {
       super("binary")
@@ -30,18 +31,26 @@ module.exports = (gl, options = {}) => {
           min: "nearest",
           wrapS: "clamp",
           wrapT: "clamp",
-          data: Uint8Array.from(
+          data: 
             Buffer.concat(this._frameBuffers, SIZE)
-          ),
+          
         })
+	var _d1 = performance.now() - _t1;
+	_t1 = performance.now();
+	console.log(`took ${_d1} to get new frame & concat the buffers`);
         gl.drawSingle({
           tex0: videoTexture,
         })
+	var _d2 = performance.now() - _t1;
+	console.log(`took ${_d2} to draw to gl`)
+	_t1 = performance.now();
         if (options.onFrame) {
           options.onFrame(Buffer.from(gl.read(SIZE)))
+	console.log(`took ${performance.now() - _t1} to read the gl`)
         }
         this._totalLength = 0
         this._frameBuffers.length = 0
+	console.log('\n')
       } else {
         this._frameBuffers.push(chunk)
       }

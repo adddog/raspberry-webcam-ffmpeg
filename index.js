@@ -43,7 +43,7 @@ const USE_FFPLAY = false//true
 const CONFIG = {
   width: 480,
   height: 360,
-  fps: 1,
+  fps: 4,
 }
 
 const OMX =
@@ -110,7 +110,7 @@ const output = Output({
   ],
 })
 const camera = Camera(gl, {
-  fps: 4,
+  fps: CONFIG.fps,
   onFrame: buffer => {
       _converting = true
 console.log(buffer.length)
@@ -120,4 +120,4 @@ console.log(buffer.length)
       })*/
   },
 })
-camera.play("http://192.168.1.159:8080/video.jpeg")
+camera.play("http://192.168.1.160:8080/video.jpeg")
