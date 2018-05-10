@@ -36,7 +36,7 @@ module.exports = (gl, options = {}) => {
           tex0: videoTexture,
         })
         if (options.onFrame) {
-          options.onFrame(gl.read(SIZE))
+          options.onFrame(Buffer.from(gl.read(SIZE)))
         }
         this._totalLength = 0
         this._frameBuffers.length = 0

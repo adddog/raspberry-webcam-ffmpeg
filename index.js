@@ -49,7 +49,7 @@ const ffoutput = USE_OMX ? OMX : USE_FFPLAY ? FFPLAY : USE_UDP;
 const CONFIG = {
   width: 480,
   height: 360,
-  fps: 2,
+  fps: 14,
 }
 const IMG_COMMAND = [
   "-depth",
@@ -99,17 +99,17 @@ const output = Output({
     "-bufsize",
     "1200k",
     "-an",
-    //"-analyzeduration",
-    //"1024",
-    //"-probesize",
-    //"512",
+    "-analyzeduration",
+    "512",
+    "-probesize",
+    "128",
     "-f",
     "m4v",
     ...ffoutput.split(" "),
   ],
 })
 const camera = Camera(gl, {
-  fps: 6,
+  fps: CONFIG.fps,
   onFrame: buffer => {
       _converting = true
       output.frame(buffer)
@@ -118,4 +118,4 @@ const camera = Camera(gl, {
       })*/
   },
 })
-camera.play("http://192.168.1.154:8080/video.jpeg")
+camera.play("http://192.168.1.160:8080/video.jpeg")
