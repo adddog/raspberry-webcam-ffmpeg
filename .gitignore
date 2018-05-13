@@ -22,3 +22,4 @@ build
 *.ffm
 .DS_Store
 yarn.lock
+log.txt
