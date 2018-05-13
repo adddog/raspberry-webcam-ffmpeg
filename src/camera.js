@@ -6,26 +6,10 @@ module.exports = (gl, options = {}) => {
   const FPS = options.fps || 15;
   const PIX_SIZE = options.pixSize || 4;
   let WIDTH = options.width || 480;
-  let HEIGHT = options.width || 360;
+  let HEIGHT = options.height || 360;
   let SIZE = WIDTH * HEIGHT * PIX_SIZE;
 
-  const videoTexture = gl.createTexture();
-  var _t1 = performance();
-  class WriteStream extends Writable {
-    constructor() {
-      super("binary");
-      this._totalLength = 0;
-      this._frameBuffers = [];
-    }
-
-    _write(chunk, encoding, callback) {
-      this._totalLength += chunk.length;
-      if (this._totalLength % SIZE === 0) {
-         console.log("Got frame");
-
-        var _d1 = performance();
-
-        videoTexture({
+  const videoTexture = gl.regl.texture({
           format: "rgba",
           width: WIDTH,
           height: HEIGHT,
@@ -34,13 +18,41 @@ module.exports = (gl, options = {}) => {
           min: "nearest",
           wrapS: "clamp",
           wrapT: "clamp",
-          data: Buffer.concat(this._frameBuffers, SIZE),
+         // data: Buffer.concat(this._frameBuffers, SIZE),
         });
 
+  var _t1 = performance();
+  class WriteStream extends Writable {
+    constructor() {
+      super("ascii");
+      this._totalLength = 0;
+      this._frameBuffers = [];
+    }
+
+    _write(chunk, encoding, callback) {
+      this._totalLength += chunk.length;
+      if (this._totalLength % SIZE === 0) {
+      
+
+     
+   var _d1 = performance();
+
+	videoTexture.subimage({
+          width: WIDTH,
+          height: HEIGHT,
+data:Buffer.concat(this._frameBuffers, SIZE)}, 0, 0)
+
+
+// Buffer.concat(this._frameBuffers, SIZE)
 
         gl.drawSingle({
           tex0: videoTexture,
         });
+ 
+
+        if (options.onFrame) {
+          options.onFrame(Buffer.from(gl.read(SIZE).buffer));
+        }
 
         _t1 = performance();
 
@@ -48,9 +60,7 @@ module.exports = (gl, options = {}) => {
           `took ${_t1 - _d1} to get new frame & concat the buffers & draw`
         );
 
-        if (options.onFrame) {
-          //options.onFrame(Buffer.from(gl.read(SIZE).buffer));
-        }
+
         this._totalLength = 0;
         this._frameBuffers.length = 0;
         //console.log('\n');
@@ -74,7 +84,7 @@ module.exports = (gl, options = {}) => {
       ])
       .videoCodec("rawvideo")
       .fps(`${options.framerate || FPS}`)
-      //.size(`${WIDTH}:`) // HACK
+      .size(`${WIDTH}x${HEIGHT}`) // HACK
       .outputOptions(
         "-pix_fmt",
         "rgba",
@@ -86,14 +96,17 @@ module.exports = (gl, options = {}) => {
         "-maxrate",
         "300k",
         "-bufsize",
-        "500k",
+        "1024k",
         "-an",
         "-analyzeduration",
         "128",
+        "-y",
+        "-threads",
+        "2",
         "-probesize",
         "32"
       )
-      .videoBitrate("200k")
+      .videoBitrate("100k")
       .format("rawvideo")
       .on("start", function(cmd) {
         console.log(cmd);

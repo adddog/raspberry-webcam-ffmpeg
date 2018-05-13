@@ -50,8 +50,10 @@ const FFPLAY = "- | ffplay -"
 const ffoutput = USE_OMX ? OMX : USE_FFPLAY ? FFPLAY : USE_UDP;
 
 const CONFIG = {
-  width: 480,
-  height: 360,
+ // width: 480,
+  //height: 360,
+width: 240,
+  height: 180,
   fps: 3,
 }
 const IMG_COMMAND = [
@@ -104,6 +106,7 @@ const output = Output({
 });
 const camera = Camera(gl, {
   fps: CONFIG.fps,
+ ...CONFIG,
   onFrame: buffer => {
     _converting = true;
     console.log(buffer.length);

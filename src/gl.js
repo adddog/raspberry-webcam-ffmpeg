@@ -61,6 +61,7 @@ module.exports = (config = {}) => {
 
           void main() {
             vec3 color = texture2D(tex0, texCoord).rgb;
+           // vec3 color = vec3(0.2,0.2,0.5);
             color = Posterize(color);
             gl_FragColor = vec4(color,1);
           }
@@ -68,7 +69,7 @@ module.exports = (config = {}) => {
           `,
 
       uniforms: {
-        tex0: gl.prop("tex0"),
+         tex0: gl.prop("tex0"),
       },
       attributes: {
         position: VERTEX_BUFFER,
