@@ -2,18 +2,11 @@
 /*const { get, post, socket } = server.router
 const { render } = server.reply*/
 
-<<<<<<< HEAD
-const GL = require("./src/gl");
-const IM = require("./src/imagemagick");
-const Camera = require("./src/camera");
-const Output = require("./src/output");
-=======
 const GL = require("./src/gl")
 const IM = require("./src/imagemagick")
 const Camera = require("./src/camera")
 const Output = require("./src/output")
 const {WEBM} = require("./src/outputs")
->>>>>>> working-pi
 
 /*server(
   [

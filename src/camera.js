@@ -1,11 +1,7 @@
-<<<<<<< HEAD
 const { Writable } = require("stream");
 const fluentFF = require("fluent-ffmpeg");
-=======
-const { Writable } = require("stream")
-const performance = require("performance-now")
-const fluentFF = require("fluent-ffmpeg")
->>>>>>> working-pi
+const { Writable } = require("stream");
+const performance = require("performance-now");
 
 module.exports = (gl, options = {}) => {
   const FPS = options.fps || 15;
@@ -15,7 +11,7 @@ module.exports = (gl, options = {}) => {
   let SIZE = WIDTH * HEIGHT * PIX_SIZE;
 
   const videoTexture = gl.createTexture();
-
+  var _t1 = performance.now();
   class WriteStream extends Writable {
     constructor() {
       super("binary");
@@ -26,7 +22,7 @@ module.exports = (gl, options = {}) => {
     _write(chunk, encoding, callback) {
       this._totalLength += chunk.length;
       if (this._totalLength % SIZE === 0) {
-      videoTexture({
+        videoTexture({
           format: "rgba",
           width: WIDTH,
           height: HEIGHT,
@@ -35,8 +31,13 @@ module.exports = (gl, options = {}) => {
           min: "nearest",
           wrapS: "clamp",
           wrapT: "clamp",
-          data: Buffer.concat(this._frameBuffers, SIZE)
-        })
+          data: Buffer.concat(this._frameBuffers, SIZE),
+        });
+        var _d1 = performance.now() - _t1;
+        _t1 = performance.now();
+        console.log(
+          `took ${_d1} to get new frame & concat the buffers`
+        );
         gl.drawSingle({
           tex0: videoTexture,
         });
