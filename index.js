@@ -2,10 +2,18 @@
 /*const { get, post, socket } = server.router
 const { render } = server.reply*/
 
+<<<<<<< HEAD
 const GL = require("./src/gl");
 const IM = require("./src/imagemagick");
 const Camera = require("./src/camera");
 const Output = require("./src/output");
+=======
+const GL = require("./src/gl")
+const IM = require("./src/imagemagick")
+const Camera = require("./src/camera")
+const Output = require("./src/output")
+const {WEBM} = require("./src/outputs")
+>>>>>>> working-pi
 
 /*server(
   [
@@ -39,21 +47,20 @@ const Output = require("./src/output");
  *
  ************** */
 
-const USE_OMX = false;
-const USE_FFPLAY = true; //true
+const USE_OMX = false
+const USE_FFPLAY = true
+const USE_UDP = "udp://192.168.1.134:3333"
+const OMX = `- | mplayer -fps 30 -aspect 16:9 -fs -zoom -cache 1024 -`
+//const OMX =
+ // "- | omxplayer -b -r -g --no-keys -s -I -z --timeout 60 -o hdmi --fps 1 pipe:0"
+const FFPLAY = "- | ffplay -"
+const ffoutput = USE_OMX ? OMX : USE_FFPLAY ? FFPLAY : USE_UDP;
 
 const CONFIG = {
   width: 480,
   height: 360,
-  fps: 15,
-};
-
-const OMX = `omxplayer -b -r --no-keys -s -I -z --timeout 60 --live --fps ${
-  CONFIG.fps
-} -o hdmi  pipe:0`;
-const FFPLAY = "ffplay -";
-const ffoutput = USE_OMX ? OMX : USE_FFPLAY ? FFPLAY : "";
-
+  fps: 6,
+}
 const IMG_COMMAND = [
   "-depth",
   "8",
@@ -75,43 +82,30 @@ const output = Output({
     "rgba",
     "-s",
     `${CONFIG.width}x${CONFIG.height}`,
-    "-r",
+    "-framerate",
     CONFIG.fps,
   ],
   output: [
-    "-movflags",
-    "+faststart",
-    "-preset",
-    "ultrafast",
+    //...WEBM,
+    /*"-s",
+    `${CONFIG.width}x${CONFIG.height}`,
     "-r",
     CONFIG.fps,
-    "-tune",
-    "zerolatency",
-    "-c:v",
-    "libx264",
-    "-pix_fmt",
-    "yuv420p",
-    "-b:v",
-    "600k",
-    "-minrate",
-    "300k",
-    "-maxrate",
-    "600k",
-    "-bufsize",
-    "1200k",
-    "-an",
-    // "-analyzeduration",
-    // "1024",
-    // "-probesize",
-    // "512",
-    //`"http://localhost:8080/feed1.ffm"`,
-    "-",
-    "|",
-    ...ffoutput.split(" "),
+    "-framerate",
+    CONFIG.fps,*/
+
+   // "-c:v",
+    //"mpeg1video",
+    /*"-r",
+    "14",
+    "-f",
+    "alsa",*/
+    // "-an",
+    `"http://localhost:8080/feed2.ffm"`
   ],
 });
 const camera = Camera(gl, {
-  fps: 4,
+  fps: CONFIG.fps,
   onFrame: buffer => {
     _converting = true;
     console.log(buffer.length);
@@ -120,5 +114,5 @@ const camera = Camera(gl, {
         _converting = false
       })*/
   },
-});
-camera.play("http://192.168.1.153:8080/video.jpeg");
+})
+camera.play("http://192.168.1.160:8080/video.jpeg")

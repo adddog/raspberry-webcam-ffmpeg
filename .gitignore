@@ -19,5 +19,6 @@ build
 *.png
 *.zip
 *.3gp
+*.ffm
 .DS_Store
 yarn.lock

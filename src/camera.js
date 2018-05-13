@@ -1,5 +1,11 @@
+<<<<<<< HEAD
 const { Writable } = require("stream");
 const fluentFF = require("fluent-ffmpeg");
+=======
+const { Writable } = require("stream")
+const performance = require("performance-now")
+const fluentFF = require("fluent-ffmpeg")
+>>>>>>> working-pi
 
 module.exports = (gl, options = {}) => {
   const FPS = options.fps || 15;
@@ -20,8 +26,7 @@ module.exports = (gl, options = {}) => {
     _write(chunk, encoding, callback) {
       this._totalLength += chunk.length;
       if (this._totalLength % SIZE === 0) {
-          options.onFrame(Buffer.concat(this._frameBuffers, SIZE));
-        /*videoTexture({
+      videoTexture({
           format: "rgba",
           width: WIDTH,
           height: HEIGHT,
@@ -30,14 +35,14 @@ module.exports = (gl, options = {}) => {
           min: "nearest",
           wrapS: "clamp",
           wrapT: "clamp",
-          data: Buffer.concat(this._frameBuffers, SIZE),
-        });
+          data: Buffer.concat(this._frameBuffers, SIZE)
+        })
         gl.drawSingle({
           tex0: videoTexture,
         });
         if (options.onFrame) {
           options.onFrame(Buffer.from(gl.read(SIZE)));
-        }*/
+        }
         this._totalLength = 0;
         this._frameBuffers.length = 0;
       } else {
@@ -62,7 +67,7 @@ module.exports = (gl, options = {}) => {
       .fps(`${options.framerate || FPS}`)
       //.size(`${WIDTH}:`) // HACK
       .outputOptions("-pix_fmt", "rgba", "-an")
-      //.videoBitrate("800k")
+      .videoBitrate("200k")
       .format("rawvideo")
       .on("start", function(cmd) {
         console.log(cmd);
