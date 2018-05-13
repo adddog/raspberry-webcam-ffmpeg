@@ -1,6 +1,5 @@
 const { Writable } = require("stream");
 const fluentFF = require("fluent-ffmpeg");
-const { Writable } = require("stream");
 const performance = require("performance-now");
 
 module.exports = (gl, options = {}) => {
