@@ -6,6 +6,7 @@ const GL = require("./src/gl")
 const IM = require("./src/imagemagick")
 const Camera = require("./src/camera")
 const Output = require("./src/output")
+const {WEBM} = require("./src/outputs")
 
 server(
   [
@@ -37,8 +38,8 @@ server(
  *
  ************** */
 
-const USE_OMX = true
-const USE_FFPLAY = false
+const USE_OMX = false
+const USE_FFPLAY = true
 const USE_UDP = "udp://192.168.1.134:3333"
 const OMX = `- | mplayer -fps 30 -aspect 16:9 -fs -zoom -cache 1024 -`
 //const OMX =
@@ -49,7 +50,7 @@ const ffoutput = USE_OMX ? OMX : USE_FFPLAY ? FFPLAY : USE_UDP;
 const CONFIG = {
   width: 480,
   height: 360,
-  fps: 14,
+  fps: 6,
 }
 const IMG_COMMAND = [
   "-depth",
@@ -76,36 +77,22 @@ const output = Output({
     CONFIG.fps,
   ],
   output: [
-    "-movflags",
-    "+faststart",
-    "-preset",
-    "ultrafast",
+    //...WEBM,
+    /*"-s",
+    `${CONFIG.width}x${CONFIG.height}`,
     "-r",
-    "30",
-    "-tune",
-    "zerolatency",
-    "-c:v",
-    "libx264",
-    "-pix_fmt",
-    "yuv420p",
-    "-b:v",
-    "600k",
-    "-crf",
-    "30",
-    "-minrate",
-    "300k",
-    "-maxrate",
-    "600k",
-    "-bufsize",
-    "1200k",
-    "-an",
-    "-analyzeduration",
-    "512",
-    "-probesize",
-    "128",
+    CONFIG.fps,
+    "-framerate",
+    CONFIG.fps,*/
+
+   // "-c:v",
+    //"mpeg1video",
+    /*"-r",
+    "14",
     "-f",
-    "m4v",
-    ...ffoutput.split(" "),
+    "alsa",*/
+    // "-an",
+    `"http://localhost:8080/feed2.ffm"`
   ],
 })
 const camera = Camera(gl, {

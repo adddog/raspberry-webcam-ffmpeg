@@ -61,7 +61,7 @@ module.exports = (config = {}) => {
 
           void main() {
             vec3 color = texture2D(tex0, texCoord).rgb;
-            // color = Posterize(color);
+            color = Posterize(color);
             gl_FragColor = vec4(color,1);
           }
 

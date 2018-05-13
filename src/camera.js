@@ -1,4 +1,5 @@
 const { Writable } = require("stream")
+const performance = require("performance-now")
 const fluentFF = require("fluent-ffmpeg")
 
 module.exports = (gl, options = {}) => {
@@ -62,7 +63,7 @@ module.exports = (gl, options = {}) => {
       .fps(`${options.framerate || FPS}`)
       //.size(`${WIDTH}:`) // HACK
       .outputOptions("-pix_fmt", "rgba", "-an")
-      //.videoBitrate("800k")
+      .videoBitrate("200k")
       .format("rawvideo")
       .on("start", function(cmd) {
         console.log(cmd)
