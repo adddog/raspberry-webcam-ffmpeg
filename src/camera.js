@@ -10,7 +10,7 @@ module.exports = (gl, options = {}) => {
   let SIZE = WIDTH * HEIGHT * PIX_SIZE;
 
   const videoTexture = gl.createTexture();
-  var _t1 = performance.now();
+  var _t1 = performance();
   class WriteStream extends Writable {
     constructor() {
       super("binary");
@@ -32,8 +32,8 @@ module.exports = (gl, options = {}) => {
           wrapT: "clamp",
           data: Buffer.concat(this._frameBuffers, SIZE),
         });
-        var _d1 = performance.now() - _t1;
-        _t1 = performance.now();
+        var _d1 = performance() - _t1;
+        _t1 = performance();
         console.log(
           `took ${_d1} to get new frame & concat the buffers`
         );
