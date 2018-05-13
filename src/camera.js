@@ -10,21 +10,23 @@ module.exports = (gl, options = {}) => {
   let SIZE = WIDTH * HEIGHT * PIX_SIZE;
 
   const videoTexture = gl.regl.texture({
-          format: "rgba",
-          width: WIDTH,
-          height: HEIGHT,
-          type: "uint8",
-          mag: "nearest",
-          min: "nearest",
-          wrapS: "clamp",
-          wrapT: "clamp",
-         // data: Buffer.concat(this._frameBuffers, SIZE),
-        });
+    format: "rgba",
+    width: WIDTH,
+    height: HEIGHT,
+    type: "uint8",
+    mag: "nearest",
+    min: "nearest",
+    wrapS: "clamp",
+    wrapT: "clamp",
+    // data: Buffer.concat(this._frameBuffers, SIZE),
+  });
 
   var _t1 = performance();
   class WriteStream extends Writable {
+
     constructor() {
       super("ascii");
+      this._updating = false
       this._totalLength = 0;
       this._frameBuffers = [];
     }
@@ -32,23 +34,25 @@ module.exports = (gl, options = {}) => {
     _write(chunk, encoding, callback) {
       this._totalLength += chunk.length;
       if (this._totalLength % SIZE === 0) {
-      
 
-     
-   var _d1 = performance();
+        this._updating = true
+        var _d1 = performance();
 
-	videoTexture.subimage({
-          width: WIDTH,
-          height: HEIGHT,
-data:Buffer.concat(this._frameBuffers, SIZE)}, 0, 0)
+        videoTexture.subimage(
+          {
+            width: WIDTH,
+            height: HEIGHT,
+            data: Buffer.concat(this._frameBuffers, SIZE),
+          },
+          0,
+          0
+        );
 
-
-// Buffer.concat(this._frameBuffers, SIZE)
+        // Buffer.concat(this._frameBuffers, SIZE)
 
         gl.drawSingle({
           tex0: videoTexture,
         });
- 
 
         if (options.onFrame) {
           options.onFrame(Buffer.from(gl.read(SIZE).buffer));
@@ -57,15 +61,20 @@ data:Buffer.concat(this._frameBuffers, SIZE)}, 0, 0)
         _t1 = performance();
 
         console.log(
-          `took ${_t1 - _d1} to get new frame & concat the buffers & draw`
+          `took ${_t1 -
+            _d1} to get new frame & concat the buffers & draw`
         );
-
 
         this._totalLength = 0;
         this._frameBuffers.length = 0;
+        this._updating = false
         //console.log('\n');
       } else {
-        this._frameBuffers.push(chunk);
+        if(!this._updating){
+          this._frameBuffers.push(chunk);
+        }else{
+          console.log("Oops");
+        }
       }
       callback();
     }
@@ -94,7 +103,7 @@ data:Buffer.concat(this._frameBuffers, SIZE)}, 0, 0)
         "-minrate",
         "100k",
         "-maxrate",
-        "300k",
+        "500k",
         "-bufsize",
         "1024k",
         "-an",
@@ -106,7 +115,7 @@ data:Buffer.concat(this._frameBuffers, SIZE)}, 0, 0)
         "-probesize",
         "32"
       )
-      .videoBitrate("100k")
+      .videoBitrate("400k")
       .format("rawvideo")
       .on("start", function(cmd) {
         console.log(cmd);

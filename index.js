@@ -109,7 +109,6 @@ const camera = Camera(gl, {
  ...CONFIG,
   onFrame: buffer => {
     _converting = true;
-    console.log(buffer.length);
     output.frame(buffer);
     /*IM.convert(buffer, IMG_COMMAND, imageBuffer => {
         _converting = false
