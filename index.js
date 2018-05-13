@@ -1,5 +1,5 @@
 const server = require("server")
-const { get, socket } = server.router
+const { get, post, socket } = server.router
 const { render } = server.reply
 
 const GL = require("./src/gl")
@@ -16,6 +16,8 @@ server(
     get("/connect", ctx => {
       ctx.session.counter = ctx.session.counter || 0
       return render("index.html")
+    }),
+    get("/start", ctx => {
     }),
   ],
   socket("connect", ctx => {
@@ -77,17 +79,17 @@ const output = Output({
     CONFIG.fps,
   ],
   output: [
-    "-movflags",
+   /* "-movflags",
     "+faststart",
     "-preset",
-    "ultrafast",
+    "ultrafast",*/
     "-r",
     CONFIG.fps,
-    "-tune",
-    "zerolatency",
+   /* "-tune",
+    "zerolatency",*/
     "-c:v",
-    "libx264",
-    "-pix_fmt",
+    "libvpx",
+    /*"-pix_fmt",
     "yuv420p",
     "-b:v",
     "600k",
@@ -96,17 +98,17 @@ const output = Output({
     "-maxrate",
     "600k",
     "-bufsize",
-    "1200k",
+    "1200k",*/
     "-an",
    // "-analyzeduration",
    // "1024",
    // "-probesize",
     // "512",
-    "-f",
-    "mpegts",
-    "-",
+    //"-f",
+    //"mpegts",
+    /*"-",
     "|",
-    ...ffoutput.split(" "),
+    ...ffoutput.split(" "),*/
   ],
 })
 const camera = Camera(gl, {
