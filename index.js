@@ -1,13 +1,13 @@
-const server = require("server")
-const { get, post, socket } = server.router
-const { render } = server.reply
+// const server = require("server")
+/*const { get, post, socket } = server.router
+const { render } = server.reply*/
 
-const GL = require("./src/gl")
-const IM = require("./src/imagemagick")
-const Camera = require("./src/camera")
-const Output = require("./src/output")
+const GL = require("./src/gl");
+const IM = require("./src/imagemagick");
+const Camera = require("./src/camera");
+const Output = require("./src/output");
 
-server(
+/*server(
   [
     get("/", ctx => {
       ctx.session.counter = ctx.session.counter || 0
@@ -34,25 +34,25 @@ server(
     }, 1000)
   })
 )
-
+*/
 /***************
  *
  ************** */
 
-const USE_OMX = true
-const USE_FFPLAY = false//true
+const USE_OMX = false;
+const USE_FFPLAY = true; //true
 
 const CONFIG = {
   width: 480,
   height: 360,
-  fps: 1,
-}
+  fps: 15,
+};
 
-const OMX =
-  `omxplayer -b -r --no-keys -s -I -z --timeout 60 --live --fps ${CONFIG.fps} -o hdmi  pipe:0`
-const FFPLAY = "ffplay -"
-const ffoutput = USE_OMX ? OMX : USE_FFPLAY ? FFPLAY : ""
-
+const OMX = `omxplayer -b -r --no-keys -s -I -z --timeout 60 --live --fps ${
+  CONFIG.fps
+} -o hdmi  pipe:0`;
+const FFPLAY = "ffplay -";
+const ffoutput = USE_OMX ? OMX : USE_FFPLAY ? FFPLAY : "";
 
 const IMG_COMMAND = [
   "-depth",
@@ -61,10 +61,10 @@ const IMG_COMMAND = [
   `${CONFIG.width}x${CONFIG.height}`,
   "rgba:-",
   "JPEG:-",
-]
+];
 
-let _converting = false
-const gl = GL(CONFIG)
+let _converting = false;
+const gl = GL(CONFIG);
 const output = Output({
   input: [
     "-f",
@@ -79,17 +79,17 @@ const output = Output({
     CONFIG.fps,
   ],
   output: [
-   /* "-movflags",
+    "-movflags",
     "+faststart",
     "-preset",
-    "ultrafast",*/
+    "ultrafast",
     "-r",
     CONFIG.fps,
-   /* "-tune",
-    "zerolatency",*/
+    "-tune",
+    "zerolatency",
     "-c:v",
-    "libvpx",
-    /*"-pix_fmt",
+    "libx264",
+    "-pix_fmt",
     "yuv420p",
     "-b:v",
     "600k",
@@ -98,28 +98,27 @@ const output = Output({
     "-maxrate",
     "600k",
     "-bufsize",
-    "1200k",*/
+    "1200k",
     "-an",
-   // "-analyzeduration",
-   // "1024",
-   // "-probesize",
+    // "-analyzeduration",
+    // "1024",
+    // "-probesize",
     // "512",
-    //"-f",
-    //"mpegts",
-    /*"-",
+    //`"http://localhost:8080/feed1.ffm"`,
+    "-",
     "|",
-    ...ffoutput.split(" "),*/
+    ...ffoutput.split(" "),
   ],
-})
+});
 const camera = Camera(gl, {
   fps: 4,
   onFrame: buffer => {
-      _converting = true
-console.log(buffer.length)
-      output.frame(buffer)
-      /*IM.convert(buffer, IMG_COMMAND, imageBuffer => {
+    _converting = true;
+    console.log(buffer.length);
+    output.frame(buffer);
+    /*IM.convert(buffer, IMG_COMMAND, imageBuffer => {
         _converting = false
       })*/
   },
-})
-camera.play("http://192.168.1.159:8080/video.jpeg")
+});
+camera.play("http://192.168.1.153:8080/video.jpeg");

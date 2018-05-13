@@ -1,27 +1,27 @@
-const { Writable } = require("stream")
-const fluentFF = require("fluent-ffmpeg")
+const { Writable } = require("stream");
+const fluentFF = require("fluent-ffmpeg");
 
 module.exports = (gl, options = {}) => {
-  const FPS = options.fps || 15
-  const PIX_SIZE = options.pixSize || 4
-  let WIDTH = options.width || 480
-  let HEIGHT = options.width || 360
-  let SIZE = WIDTH * HEIGHT * PIX_SIZE
+  const FPS = options.fps || 15;
+  const PIX_SIZE = options.pixSize || 4;
+  let WIDTH = options.width || 480;
+  let HEIGHT = options.width || 360;
+  let SIZE = WIDTH * HEIGHT * PIX_SIZE;
 
-  const videoTexture = gl.createTexture()
-
+  const videoTexture = gl.createTexture();
 
   class WriteStream extends Writable {
     constructor() {
-      super("binary")
-      this._totalLength = 0
-      this._frameBuffers = []
+      super("binary");
+      this._totalLength = 0;
+      this._frameBuffers = [];
     }
 
     _write(chunk, encoding, callback) {
-      this._totalLength += chunk.length
+      this._totalLength += chunk.length;
       if (this._totalLength % SIZE === 0) {
-        videoTexture({
+          options.onFrame(Buffer.concat(this._frameBuffers, SIZE));
+        /*videoTexture({
           format: "rgba",
           width: WIDTH,
           height: HEIGHT,
@@ -30,30 +30,28 @@ module.exports = (gl, options = {}) => {
           min: "nearest",
           wrapS: "clamp",
           wrapT: "clamp",
-          data: Uint8Array.from(
-            Buffer.concat(this._frameBuffers, SIZE)
-          ),
-        })
+          data: Buffer.concat(this._frameBuffers, SIZE),
+        });
         gl.drawSingle({
           tex0: videoTexture,
-        })
+        });
         if (options.onFrame) {
-          options.onFrame(Buffer.from(gl.read(SIZE)))
-        }
-        this._totalLength = 0
-        this._frameBuffers.length = 0
+          options.onFrame(Buffer.from(gl.read(SIZE)));
+        }*/
+        this._totalLength = 0;
+        this._frameBuffers.length = 0;
       } else {
-        this._frameBuffers.push(chunk)
+        this._frameBuffers.push(chunk);
       }
-      callback()
+      callback();
     }
   }
 
-  let ostream
-  let ffmpegCommand
+  let ostream;
+  let ffmpegCommand;
 
   function play(src, options = {}) {
-    ostream = new WriteStream()
+    ostream = new WriteStream();
     ffmpegCommand = fluentFF(src)
       .inputFormat("image2pipe")
       .inputOptions([
@@ -67,18 +65,18 @@ module.exports = (gl, options = {}) => {
       //.videoBitrate("800k")
       .format("rawvideo")
       .on("start", function(cmd) {
-        console.log(cmd)
+        console.log(cmd);
       })
       .on("error", function(err) {
-        console.log("An error occurred: " + err.message)
-        process.exit()
+        console.log("An error occurred: " + err.message);
+        process.exit();
       })
       .on("end", function() {
-        ostream = null
+        ostream = null;
       })
-      .pipe(ostream, { end: true })
+      .pipe(ostream, { end: true });
 
-    return ffmpegCommand
+    return ffmpegCommand;
   }
-  return { play }
-}
+  return { play };
+};
