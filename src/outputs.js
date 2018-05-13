@@ -36,6 +36,6 @@ module.exports = {
     "-b:v",
     "300k",
     "-f",
-    "rawvideo",
+    "rawvideos",
   ],
 };
