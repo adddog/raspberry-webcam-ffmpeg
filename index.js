@@ -52,7 +52,7 @@ const ffoutput = USE_OMX ? OMX : USE_FFPLAY ? FFPLAY : USE_UDP;
 const CONFIG = {
   width: 480,
   height: 360,
-  fps: 2,
+  fps: 3,
 }
 const IMG_COMMAND = [
   "-depth",
@@ -87,12 +87,13 @@ const output = Output({
     CONFIG.fps,
     "-framerate",
     CONFIG.fps,*/
-
+   "-probesize","32", "-analyzeduration", "128","-use_wallclock_as_timestamps","1","-tune",
+    "zerolatency",
    // "-c:v",
     //"mpeg1video",
-    /*"-r",
-    "14",
-    "-f",
+    "-r",
+    "30",
+    /*"-f",
     "alsa",*/
      "-an",
 //"udp://192.168.1.81:3333"
