@@ -21,8 +21,9 @@ module.exports = (gl, options = {}) => {
     _write(chunk, encoding, callback) {
       this._totalLength += chunk.length;
       if (this._totalLength % SIZE === 0) {
-        console.log("Got frame");
-        var _d1 = performance() - _t1;
+         console.log("Got frame");
+
+        var _d1 = performance();
 
         videoTexture({
           format: "rgba",
@@ -36,21 +37,23 @@ module.exports = (gl, options = {}) => {
           data: Buffer.concat(this._frameBuffers, SIZE),
         });
 
-        _t1 = performance();
 
         gl.drawSingle({
           tex0: videoTexture,
         });
 
+        _t1 = performance();
+
         console.log(
           `took ${_t1 - _d1} to get new frame & concat the buffers & draw`
         );
-        console.log('\n');
+
         if (options.onFrame) {
-          //options.onFrame(Buffer.from(gl.read(SIZE)));
+          //options.onFrame(Buffer.from(gl.read(SIZE).buffer));
         }
         this._totalLength = 0;
         this._frameBuffers.length = 0;
+        //console.log('\n');
       } else {
         this._frameBuffers.push(chunk);
       }
