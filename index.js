@@ -6,7 +6,7 @@ const GL = require("./src/gl")
 const IM = require("./src/imagemagick")
 const Camera = require("./src/camera")
 const Output = require("./src/output")
-const {WEBM} = require("./src/outputs")
+const {WEBM, MP4} = require("./src/outputs")
 
 /*server(
   [
@@ -52,7 +52,7 @@ const ffoutput = USE_OMX ? OMX : USE_FFPLAY ? FFPLAY : USE_UDP;
 const CONFIG = {
   width: 480,
   height: 360,
-  fps: 6,
+  fps: 2,
 }
 const IMG_COMMAND = [
   "-depth",
@@ -79,7 +79,8 @@ const output = Output({
     CONFIG.fps,
   ],
   output: [
-    //...WEBM,
+ //   ...WEBM,
+//...MP4,
     /*"-s",
     `${CONFIG.width}x${CONFIG.height}`,
     "-r",
@@ -93,8 +94,11 @@ const output = Output({
     "14",
     "-f",
     "alsa",*/
-    // "-an",
-    `"http://localhost:8080/feed2.ffm"`
+     "-an",
+//"udp://192.168.1.81:3333"
+    `"http://localhost:8090/feed2.ffm"`,
+"2>",
+"log.txt"
   ],
 });
 const camera = Camera(gl, {

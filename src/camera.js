@@ -32,11 +32,13 @@ module.exports = (gl, options = {}) => {
           wrapT: "clamp",
           data: Buffer.concat(this._frameBuffers, SIZE),
         });
+/*
         var _d1 = performance() - _t1;
         _t1 = performance();
         console.log(
           `took ${_d1} to get new frame & concat the buffers`
         );
+*/
         gl.drawSingle({
           tex0: videoTexture,
         });
