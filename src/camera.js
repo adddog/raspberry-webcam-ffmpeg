@@ -35,6 +35,7 @@ module.exports = (gl, options = {}) => {
     }
 
     _write(chunk, encoding, callback) {
+      this._frameBuffers.push(chunk);
       this._totalLength += chunk.length;
       if (this._totalLength % SIZE === 0) {
         let _startTime;
@@ -42,17 +43,11 @@ module.exports = (gl, options = {}) => {
           _startTime = performance();
         }
 
-        const buffer = Buffer.concat(this._frameBuffers, SIZE)
-
-        IM.convert(buffer, IM.IMG_COMMAND(WIDTH,HEIGHT), imageBuffer => {
-          fs.writeFileSync(`${this._tick}.jpeg`, imageBuffer)
-        })
-
-       /* videoTexture.subimage(
+       videoTexture.subimage(
           {
             width: WIDTH,
             height: HEIGHT,
-            data: buffer,
+            data: Buffer.concat(this._frameBuffers, SIZE),
           },
           0,
           0
@@ -60,12 +55,11 @@ module.exports = (gl, options = {}) => {
 
         gl.drawSingle({
           tex0: videoTexture,
-          tick: this._tick,
         });
 
         if (options.onFrame) {
           options.onFrame(Buffer.from(gl.read(SIZE).buffer));
-        }*/
+        }
 
         if (LOG) {
           console.log(
@@ -77,9 +71,6 @@ module.exports = (gl, options = {}) => {
         this._totalLength = 0;
         this._frameBuffers.length = 0;
         this._tick+=0.01;
-        //console.log('\n');
-      } else {
-        this._frameBuffers.push(chunk);
       }
       callback();
     }
@@ -94,6 +85,7 @@ module.exports = (gl, options = {}) => {
       .inputFormat("image2pipe")
       .inputOptions([
         `-framerate ${options.framerate || FPS}`,
+        `-s ${WIDTH}x${HEIGHT}`,
         `-vcodec ${options.vcodec || "mjpeg"}`,
       ])
       .videoCodec("rawvideo")
@@ -116,11 +108,11 @@ module.exports = (gl, options = {}) => {
         "128",
         "-y",
         "-threads",
-        "2",
+        "1",
         "-probesize",
         "32"
       )
-      .videoBitrate("400k")
+      // .videoBitrate("400k")
       .format("rawvideo")
       .on("start", function(cmd) {
         console.log(cmd);
