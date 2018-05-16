@@ -1,6 +1,9 @@
 const { Writable } = require("stream");
 const fluentFF = require("fluent-ffmpeg");
 const performance = require("performance-now");
+const testImage = require("./testImage");
+
+const LOG = true;
 
 module.exports = (gl, options = {}) => {
   const FPS = options.fps || 15;
@@ -18,31 +21,33 @@ module.exports = (gl, options = {}) => {
     min: "nearest",
     wrapS: "clamp",
     wrapT: "clamp",
-    // data: Buffer.concat(this._frameBuffers, SIZE),
   });
+  const data  = testImage.rgba(WIDTH, HEIGHT)
+  console.log(data);
 
   var _t1 = performance();
   class WriteStream extends Writable {
-
     constructor() {
       super("ascii");
-      this._updating = false
       this._totalLength = 0;
       this._frameBuffers = [];
+      this._tick = 1;
     }
 
     _write(chunk, encoding, callback) {
       this._totalLength += chunk.length;
       if (this._totalLength % SIZE === 0) {
-
-        this._updating = true
-        var _d1 = performance();
+        let _startTime;
+        if (LOG) {
+          _startTime = performance();
+        }
 
         videoTexture.subimage(
           {
             width: WIDTH,
             height: HEIGHT,
-            data: Buffer.concat(this._frameBuffers, SIZE),
+            //data: Buffer.concat(this._frameBuffers, SIZE),
+            data: data
           },
           0,
           0
@@ -52,29 +57,26 @@ module.exports = (gl, options = {}) => {
 
         gl.drawSingle({
           tex0: videoTexture,
+          tick: this._tick,
         });
 
         if (options.onFrame) {
           options.onFrame(Buffer.from(gl.read(SIZE).buffer));
         }
 
-        _t1 = performance();
-
-        console.log(
-          `took ${_t1 -
-            _d1} to get new frame & concat the buffers & draw`
-        );
+        if (LOG) {
+          console.log(
+            `took ${performance() -
+              _startTime} to get new frame & concat the buffers & draw`
+          );
+        }
 
         this._totalLength = 0;
         this._frameBuffers.length = 0;
-        this._updating = false
+        this._tick+=0.01;
         //console.log('\n');
       } else {
-        if(!this._updating){
-          this._frameBuffers.push(chunk);
-        }else{
-          console.log("Oops");
-        }
+        this._frameBuffers.push(chunk);
       }
       callback();
     }
