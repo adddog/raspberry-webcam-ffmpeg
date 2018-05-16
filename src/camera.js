@@ -22,8 +22,6 @@ module.exports = (gl, options = {}) => {
     wrapS: "clamp",
     wrapT: "clamp",
   });
-  const data  = testImage.rgba(WIDTH, HEIGHT)
-  console.log(data);
 
   var _t1 = performance();
   class WriteStream extends Writable {
@@ -47,7 +45,7 @@ module.exports = (gl, options = {}) => {
             width: WIDTH,
             height: HEIGHT,
             //data: Buffer.concat(this._frameBuffers, SIZE),
-            data: data
+            data: testImage.rgba(WIDTH, HEIGHT, true)
           },
           0,
           0
