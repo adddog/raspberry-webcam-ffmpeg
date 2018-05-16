@@ -1,6 +1,8 @@
 const { Writable } = require("stream");
+const fs = require("fs");
 const fluentFF = require("fluent-ffmpeg");
 const performance = require("performance-now");
+const IM = require("./imagemagick");
 const testImage = require("./testImage");
 
 const LOG = true;
@@ -40,18 +42,21 @@ module.exports = (gl, options = {}) => {
           _startTime = performance();
         }
 
-        videoTexture.subimage(
+        const buffer = Buffer.concat(this._frameBuffers, SIZE)
+
+        IM.convert(buffer, IM.IMG_COMMAND(WIDTH,HEIGHT), imageBuffer => {
+          fs.writeFileSync(`${this._tick}.jpeg`, imageBuffer)
+        })
+
+       /* videoTexture.subimage(
           {
             width: WIDTH,
             height: HEIGHT,
-            //data: Buffer.concat(this._frameBuffers, SIZE),
-            data: testImage.rgba(WIDTH, HEIGHT, true)
+            data: buffer,
           },
           0,
           0
         );
-
-        // Buffer.concat(this._frameBuffers, SIZE)
 
         gl.drawSingle({
           tex0: videoTexture,
@@ -60,7 +65,7 @@ module.exports = (gl, options = {}) => {
 
         if (options.onFrame) {
           options.onFrame(Buffer.from(gl.read(SIZE).buffer));
-        }
+        }*/
 
         if (LOG) {
           console.log(
