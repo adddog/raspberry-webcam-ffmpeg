@@ -4,12 +4,12 @@ var exec = require("child_process").exec;
 
 class FFServer {
   start() {
-    this.ffserver = spawn("ffserver", ["-f", "../ffserver.conf"]);
-    return this.ffserver
+    this.command = spawn("ffserver", ["-f", "../ffserver.conf"]);
+    return this.command
   }
 
   stop() {
-    this.ffserver.kill();
+    this.command.kill();
   }
 }
 

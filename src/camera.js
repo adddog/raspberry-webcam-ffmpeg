@@ -1,96 +1,39 @@
-const { Writable } = require("stream");
-const fs = require("fs");
 const fluentFF = require("fluent-ffmpeg");
-const performance = require("performance-now");
-const IM = require("./imagemagick");
-const testImage = require("./testImage");
+const CONFIG = require("./config");
+const GL = require("./gl");
+const glWriteStream = require("./glWriteStream");
 
-const LOG = true;
+class Camera {
+  constructor(config = CONFIG) {
+    this.config = config;
 
-module.exports = (gl, options = {}) => {
-  const FPS = options.fps || 15;
-  const PIX_SIZE = options.pixSize || 4;
-  let WIDTH = options.width || 480;
-  let HEIGHT = options.height || 360;
-  let SIZE = WIDTH * HEIGHT * PIX_SIZE;
-
-  const videoTexture = gl.regl.texture({
-    format: "rgba",
-    width: WIDTH,
-    height: HEIGHT,
-    type: "uint8",
-    mag: "nearest",
-    min: "nearest",
-    wrapS: "clamp",
-    wrapT: "clamp",
-  });
-
-  var _t1 = performance();
-  class WriteStream extends Writable {
-    constructor() {
-      super("ascii");
-      this._totalLength = 0;
-      this._frameBuffers = [];
-      this._tick = 1;
-    }
-
-    _write(chunk, encoding, callback) {
-      this._frameBuffers.push(chunk);
-      this._totalLength += chunk.length;
-      if (this._totalLength % SIZE === 0) {
-        let _startTime;
-        if (LOG) {
-          _startTime = performance();
-        }
-
-       videoTexture.subimage(
-          {
-            width: WIDTH,
-            height: HEIGHT,
-            data: Buffer.concat(this._frameBuffers, SIZE),
-          },
-          0,
-          0
-        );
-
-        gl.drawSingle({
-          tex0: videoTexture,
-        });
-
-        if (options.onFrame) {
-          options.onFrame(Buffer.from(gl.read(SIZE).buffer));
-        }
-
-        if (LOG) {
-          console.log(
-            `took ${performance() -
-              _startTime} to get new frame & concat the buffers & draw`
-          );
-        }
-
-        this._totalLength = 0;
-        this._frameBuffers.length = 0;
-        this._tick+=0.01;
-      }
-      callback();
-    }
+    const videoTexture = GL.regl.texture({
+      format: "rgba",
+      width: this.config.width,
+      height: this.config.height,
+      type: "uint8",
+      mag: "nearest",
+      min: "nearest",
+      wrapS: "clamp",
+      wrapT: "clamp",
+    });
   }
 
-  let ostream;
-  let ffmpegCommand;
-
-  function play(src, options = {}) {
-    ostream = new WriteStream();
-    ffmpegCommand = fluentFF(src)
+  start(options = {}) {
+    this.ostream = new glWriteStream(options);
+    if(!options.src){
+      throw new Error('Camera needs .src')
+    }
+    this.command = fluentFF(options.src)
       .inputFormat("image2pipe")
       .inputOptions([
-        `-framerate ${options.framerate || FPS}`,
-        `-s ${WIDTH}x${HEIGHT}`,
-        `-vcodec ${options.vcodec || "mjpeg"}`,
+        `-framerate ${this.config.framerate || CONFIG.fps}`,
+        `-s ${this.config.width}x${this.config.height}`,
+        `-vcodec ${this.config.vcodec || "mjpeg"}`,
       ])
       .videoCodec("rawvideo")
-      .fps(`${options.framerate || FPS}`)
-      .size(`${WIDTH}x${HEIGHT}`) // HACK
+      .fps(`${options.framerate || CONFIG.fps}`)
+      .size(`${this.config.width}x${this.config.height}`) // HACK
       .outputOptions(
         "-pix_fmt",
         "rgba",
@@ -122,11 +65,16 @@ module.exports = (gl, options = {}) => {
         process.exit();
       })
       .on("end", function() {
-        ostream = null;
+        this.ostream = null;
       })
-      .pipe(ostream, { end: true });
+      .pipe(this.ostream, { end: true });
 
-    return ffmpegCommand;
+    return this.command;
   }
-  return { play };
-};
+
+  stop() {
+    this.ostream.stdin.end();
+  }
+}
+
+module.exports = new Camera();

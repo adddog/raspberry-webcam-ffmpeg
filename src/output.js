@@ -1,63 +1,71 @@
-var spawn = require("child_process").spawn
-var exec = require("child_process").exec
+var exec = require("child_process").exec;
+const CONFIG = require("./config");
 
-module.exports = createMovieRecorderStream
-
-function createMovieRecorderStream(options) {
-  var options = Object.assign(
-    {
-      fps: 15,
-      width: 480,
-      height: 360,
-    },
-    options
-  )
-
-  var ended = false
-  var ffmpegPath = options.ffmpeg || "ffmpeg"
-  var fps = options.fps || 30
-
-  var args = [
-    ...(options.input || [
+class FFMPEG {
+  getInputOptions(config) {
+    return [
       "-f",
-      "image2pipe",
-      "-framerate",
-      "2",
+      "rawvideo",
       "-vcodec",
-      `mjpeg`,
-    ]),
-    "-i",
-    "-",
-    ...(options.output || []),
-  ]
-
-  if (options.ffplay) {
-    args.push(options.ffplay)
+      "rawvideo",
+      "-pix_fmt",
+      "rgba",
+      "-s",
+      `${config.width || CONFIG.width}x${config.height ||
+        CONFIG.height}`,
+      "-framerate",
+      config.fps || CONFIG.fps,
+    ];
   }
 
-  console.log("Command:")
-  console.log(`${ffmpegPath} ${args.join(" ")}`)
-  /*var ffmpeg = spawn(ffmpegPath, args, {
-    encoding: "buffer",
-  });*/
-  var ffmpeg = exec(`${ffmpegPath} ${args.join(" ")}`)
+  getOutputOptions() {
+    return [
+      "-probesize",
+      "32",
+      "-analyzeduration",
+      "128",
+      "-use_wallclock_as_timestamps",
+      "1",
+      "-tune",
+      "zerolatency",
+      "-r",
+      "30",
+      "-an",
+    ];
+  }
 
-  function appendFrame(jpeg) {
-    if (!ended) {
-      ffmpeg.stdin.write(jpeg)
+  start(options = {}) {
+    this.ended = false;
+    const ffmpegPath = options.ffmpeg || "ffmpeg";
+
+    const args = [
+      ...(options.input || this.getInputOptions(options)),
+      "-i",
+      "-",
+      ...(options.outputOptions || this.getOutputOptions()),
+    ];
+
+    if(!options.output){
+      throw new Error(`FFMPEG needs a .output option`)
+    }
+
+    args.push(option.output)
+
+    console.log(`${ffmpegPath} ${args.join(" ")}`);
+    this.command = exec(`${ffmpegPath} ${args.join(" ")}`);
+    return this.command;
+  }
+
+  frame(buffer) {
+    if (!this.ended) {
+      this.command.stdin.write(buffer);
     }
   }
 
-  function endMovie() {
-    ended = true
-    ffmpeg.stdin.end()
+  stop() {
+    this.ended = true;
+    this.command.stdin.end();
   }
-
-  var result = {
-    frame: appendFrame,
-    end: endMovie,
-    log: ffmpeg.stderr,
-  }
-
-  return result
 }
+
+module.exports = new FFMPEG();

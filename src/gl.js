@@ -1,35 +1,37 @@
 const headlessContext = require("gl");
 const regl = require("regl");
+const CONFIG = require("./config");
 const { hangedMan, temperance, stroke } = require("./spirit");
 
 const VERTEX_BUFFER = [[0, 0], [0, 1], [1, 0], [1, 1]];
 
-module.exports = (config = {}) => {
-  if (!config.width || !config.height) {
-    throw new Error(`No width and height specified`);
-  }
+class GL {
+  constructor(config) {
+    if (!config.width || !config.height) {
+      throw new Error(`No width and height specified`);
+    }
 
-  const gl = regl({
-    gl: headlessContext(config.width, config.height, {
-      preserveDrawingBuffer: true,
-    }),
-  });
+    this.gl = regl({
+      gl: headlessContext(config.width, config.height, {
+        preserveDrawingBuffer: true,
+      }),
+    });
 
-  gl.clear({
-    color: [0, 0, 1, 1],
-    depth: 1,
-    stencil: 0,
-  });
-
-  const drawSingle = props => {
-    gl.clear({
+    this.gl.clear({
       color: [0, 0, 0, 1],
       depth: 1,
       stencil: 0,
     });
 
-    return gl({
-      vert: `
+    this.drawSingle = props => {
+      this.gl.clear({
+        color: [0, 0, 0, 1],
+        depth: 1,
+        stencil: 0,
+      });
+
+      return gl({
+        vert: `
           precision lowp float;
           attribute vec2 position;
           varying vec2 texCoord;
@@ -40,7 +42,7 @@ module.exports = (config = {}) => {
           }
           `,
 
-      frag: `
+        frag: `
 
           #define GAMMA 0.65
         #define REGIONS 5.
@@ -79,24 +81,29 @@ module.exports = (config = {}) => {
 
           `,
 
-      uniforms: {
-        tex0: gl.prop("tex0"),
-        tick: (context, props) => {
-          return props.tick
+        uniforms: {
+          tex0: this.gl.prop("tex0"),
         },
-      },
-      attributes: {
-        position: VERTEX_BUFFER,
-      },
-      primitive: "triangle strip",
-      count: 4,
-    })(props);
-  };
+        attributes: {
+          position: VERTEX_BUFFER,
+        },
+        primitive: "triangle strip",
+        count: 4,
+      })(props);
+    };
+  }
 
-  return {
-    read: SIZE => gl.read(new Uint8Array(SIZE)),
-    regl: gl,
-    createTexture: () => gl.texture(),
-    drawSingle: drawSingle,
-  };
-};
+  read(SIZE) {
+    return this.gl.read(new Uint8Array(SIZE));
+  }
+
+  createTexture(options = {}) {
+    return this.gl.texture(options);
+  }
+
+  get regl() {
+    return this.gl;
+  }
+}
+
+module.exports = new GL(CONFIG);
