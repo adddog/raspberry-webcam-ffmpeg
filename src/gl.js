@@ -30,7 +30,7 @@ class GL {
         stencil: 0,
       });
 
-      return gl({
+      return this.gl({
         vert: `
           precision lowp float;
           attribute vec2 position;
@@ -45,11 +45,11 @@ class GL {
         frag: `
 
           #define GAMMA 0.65
-        #define REGIONS 5.
-        #define LINES 0.5
-        #define BASE 2.5
-        #define PI 3.14159265359
-        #define GREEN_BIAS 0.9
+          #define REGIONS 5.
+          #define LINES 0.5
+          #define BASE 2.5
+          #define PI 3.14159265359
+          #define GREEN_BIAS 0.9
 
           precision lowp float;
           uniform sampler2D tex0;

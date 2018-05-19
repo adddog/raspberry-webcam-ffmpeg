@@ -1,53 +1,75 @@
-const server = require("server");
-const { get, post, socket } = server.router;
-const { render } = server.reply;
+const server = require("server")
+const { get, post, socket } = server.router
+const { error } = server.router
+const { file, redirect, send } = server.reply;
+const { render } = server.reply
 
-const GL = require("./src/gl");
-const IM = require("./src/imagemagick");
-const Camera = require("./src/camera");
-const Output = require("./src/output");
-const { WEBM, MP4 } = require("./src/outputs");
+const GL = require("./src/gl")
+const CONFIG = require("./src/config")
+const IM = require("./src/imagemagick")
+const Camera = require("./src/camera")
+const Output = require("./src/output")
+const { WEBM, MP4 } = require("./src/outputs")
 
+const start = ({cameraAddr,ffserverStream}) => {
+  Output.start({
+    ...CONFIG,
+    output: [ffserverStream], //`"http://localhost:8090/mjpeg.ffm"`
+  })
 
-
-const start = () =>{
   Camera.start({
-    src: "http://192.168.1.160:8080/video.jpeg"
+    src: cameraAddr, //"http://192.168.1.160:8080/video.jpeg",
+    onFrame: buffer => {
+      Output.frame(buffer)
+    },
   })
 }
 
 
+const stop = () => {
+  Output.stop()
+  Camera.stop()
+}
 
 server(
+  { security: { csrf: false } },
   [
     get("/", ctx => {
-      ctx.session.counter = ctx.session.counter || 0;
-      return render("index.html");
-    }),
-    get("/connect", ctx => {
-      ctx.session.counter = ctx.session.counter || 0;
-      return render("index.html");
+      ctx.session.counter = ctx.session.counter || 0
+      return render("index.html")
     }),
 
-    get("/start", ctx => {}),
+    get("/connect", ctx => {
+      ctx.session.counter = ctx.session.counter || 0
+      return render("index.html")
+    }),
+
+    post("/stop", ctx => {
+      stop()
+      return 'stopped'
+    }),
+
+    post("/start", ctx => {
+      const {cameraAddr, ffserverStream} = ctx.body
+      if(!cameraAddr || !ffserverStream) {
+        throw new Error('Reject');
+      }
+      start({cameraAddr,ffserverStream})
+      return 'started'
+    }),
+
   ],
 
   socket("connect", ctx => {
-    // Emit an event every second with +1 on the session
-    setInterval(() => {
-      // Increment the counter
-      ctx.session.counter++;
-
-      // For socket.io you need to manually save it
-      ctx.session.save();
-
-      // Send the value to the currently connected socket
-      ctx.socket.emit("message", ctx.session.counter);
-    }, 1000);
+    /*setInterval(() => {
+      ctx.session.counter++
+      ctx.session.save()
+      ctx.socket.emit("message", ctx.session.counter)
+    }, 1000)*/
   })
-);
+)
 
-start()
+//start()
 
 /***************
  *

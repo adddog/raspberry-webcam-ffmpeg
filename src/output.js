@@ -35,21 +35,22 @@ class FFMPEG {
   }
 
   start(options = {}) {
+    if(this.started) return
+    this.started = true
     this.ended = false;
     const ffmpegPath = options.ffmpeg || "ffmpeg";
+
+    if(!options.output){
+      throw new Error(`FFMPEG needs a .output [] option`)
+    }
 
     const args = [
       ...(options.input || this.getInputOptions(options)),
       "-i",
       "-",
       ...(options.outputOptions || this.getOutputOptions()),
+      ...options.output
     ];
-
-    if(!options.output){
-      throw new Error(`FFMPEG needs a .output option`)
-    }
-
-    args.push(option.output)
 
     console.log(`${ffmpegPath} ${args.join(" ")}`);
     this.command = exec(`${ffmpegPath} ${args.join(" ")}`);
@@ -65,6 +66,9 @@ class FFMPEG {
   stop() {
     this.ended = true;
     this.command.stdin.end();
+    this.command.kill()
+    this.started = false
+    console.log('Killed output');
   }
 }
 

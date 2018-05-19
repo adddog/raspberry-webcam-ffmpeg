@@ -1,4 +1,7 @@
+
 const { Writable } = require("stream");
+const GL = require("./gl")
+
 class GLWriteStream extends Writable {
   constructor(props) {
     super("ascii");
@@ -14,7 +17,7 @@ class GLWriteStream extends Writable {
       this.config.size ||
       this.config.width *
         this.config.height *
-        this.config.numChannels;
+        4;
   }
 
   _write(chunk, encoding, callback) {
@@ -40,7 +43,6 @@ class GLWriteStream extends Writable {
 
       this._frameLength = 0;
       this._frameBuffers.length = 0;
-      this._tick += 0.01;
     }
 
     callback();
