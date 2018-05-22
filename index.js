@@ -10,7 +10,7 @@ const CONFIG = require("./src/config");
 const IM = require("./src/imagemagick");
 const Camera = require("./src/camera");
 const Output = require("./src/output");
-const { WEBM, MP4, DASH,DASH2 } = require("./src/outputs");
+const { WEBM, MP4, DASH, DASH2 } = require("./src/outputs");
 
 const start = ({ cameraAddr, ffserverStream }) => {
   Output.start({
@@ -34,6 +34,15 @@ const stop = () => {
 
 server(
   { security: { csrf: false } },
+  [
+    ctx => header("Access-Control-Allow-Origin", "*"),
+    ctx =>
+      header(
+        "Access-Control-Allow-Headers",
+        "Origin, X-Requested-With, Content-Type, Accept"
+      ),
+    ctx => (ctx.method.toLowerCase() === "options" ? 200 : false),
+  ],
   [
     get("/", ctx => {
       ctx.session.counter = ctx.session.counter || 0;
