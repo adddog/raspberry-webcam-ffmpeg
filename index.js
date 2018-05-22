@@ -48,7 +48,6 @@ server(
       ctx.session.counter = ctx.session.counter || 0;
       return render("index.html");
     }),
-    ctx => download('manifest.mpd', 'manifest.mpd'),
     get("/connect", ctx => {
       ctx.session.counter = ctx.session.counter || 0;
       return render("index.html");
