@@ -1,16 +1,14 @@
-var spawn = require("child_process").spawn;
-var exec = require("child_process").exec;
+const spawn = require("child_process").spawn;
 
-
-class FFServer {
+class Commmands {
   start() {
-    this.command = spawn("ffserver", ["-f", "../ffserver.conf"]);
-    return this.command
+    spawn("export", ["DISPLAY=:0"]);
+    spawn("systemctl", ["start", "ffserver.service"]);
   }
 
   stop() {
-    this.command.kill();
+    spawn("systemctl", ["stop", "ffserver.service"]);
   }
 }
 
-module.exports = new FFServer();
+module.exports = new Commmands();

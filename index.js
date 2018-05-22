@@ -5,6 +5,7 @@ const { file, redirect, send } = server.reply;
 const { render } = server.reply
 
 const GL = require("./src/gl")
+const FFSERVER = require("./src/ffserver")
 const CONFIG = require("./src/config")
 const IM = require("./src/imagemagick")
 const Camera = require("./src/camera")
@@ -12,6 +13,9 @@ const Output = require("./src/output")
 const { WEBM, MP4 } = require("./src/outputs")
 
 const start = ({cameraAddr,ffserverStream}) => {
+
+  FFSERVER.start()
+
   Output.start({
     ...CONFIG,
     output: [ffserverStream], //`"http://localhost:8090/mjpeg.ffm"`
@@ -25,8 +29,8 @@ const start = ({cameraAddr,ffserverStream}) => {
   })
 }
 
-
 const stop = () => {
+  FFSERVER.stop()
   Output.stop()
   Camera.stop()
 }
