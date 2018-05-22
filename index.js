@@ -14,8 +14,6 @@ const { WEBM, MP4 } = require("./src/outputs")
 
 const start = ({cameraAddr,ffserverStream}) => {
 
-  FFSERVER.start()
-
   Output.start({
     ...CONFIG,
     output: [ffserverStream], //`"http://localhost:8090/mjpeg.ffm"`
@@ -30,7 +28,6 @@ const start = ({cameraAddr,ffserverStream}) => {
 }
 
 const stop = () => {
-  FFSERVER.stop()
   Output.stop()
   Camera.stop()
 }
