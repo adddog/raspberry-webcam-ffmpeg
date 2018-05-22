@@ -3,7 +3,6 @@ const { get, post, socket } = server.router;
 const { error } = server.router;
 const { file, redirect, send } = server.reply;
 const { render } = server.reply;
-var MjpegProxy = require("mjpeg-proxy").MjpegProxy;
 
 const GL = require("./src/gl");
 const FFSERVER = require("./src/ffserver");
