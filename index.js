@@ -2,8 +2,7 @@ const server = require("server");
 const { get, post, socket } = server.router;
 const { error } = server.router;
 const { file, redirect, send } = server.reply;
-const { render , header} = server.reply;
-
+const { render, header, download } = server.reply;
 
 const GL = require("./src/gl");
 const FFSERVER = require("./src/ffserver");
@@ -49,13 +48,7 @@ server(
       ctx.session.counter = ctx.session.counter || 0;
       return render("index.html");
     }),
-
-    // get(
-    //   "/manifest.mpd",
-    //   ctx =>
-
-    // ),
-
+    ctx => download('manifest.mpd', 'manifest.mpd'),
     get("/connect", ctx => {
       ctx.session.counter = ctx.session.counter || 0;
       return render("index.html");
