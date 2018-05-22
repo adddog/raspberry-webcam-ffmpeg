@@ -2,7 +2,8 @@ const server = require("server");
 const { get, post, socket } = server.router;
 const { error } = server.router;
 const { file, redirect, send } = server.reply;
-const { render } = server.reply;
+const { render , header} = server.reply;
+
 
 const GL = require("./src/gl");
 const FFSERVER = require("./src/ffserver");
