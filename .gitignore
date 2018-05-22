@@ -18,6 +18,8 @@ build
 *.rgba
 *.png
 *.zip
+*.m4s
+*.mpd
 *.3gp
 *.ffm
 .DS_Store

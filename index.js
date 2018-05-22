@@ -11,12 +11,12 @@ const CONFIG = require("./src/config");
 const IM = require("./src/imagemagick");
 const Camera = require("./src/camera");
 const Output = require("./src/output");
-const { WEBM, MP4 } = require("./src/outputs");
+const { WEBM, MP4, DASH,DASH2 } = require("./src/outputs");
 
 const start = ({ cameraAddr, ffserverStream }) => {
   Output.start({
     ...CONFIG,
-    // outputOptions: [...WEBM],
+    outputOptions: [...DASH],
     output: [ffserverStream], //`"http://localhost:8090/mjpeg.ffm"`
   });
 
@@ -41,12 +41,11 @@ server(
       return render("index.html");
     }),
 
-    get(
-      "/test.mjpeg",
-      ctx =>
-        new MjpegProxy("http://localhost:8090/test.mjpeg")
-          .proxyRequest
-    ),
+    // get(
+    //   "/manifest.mpd",
+    //   ctx =>
+
+    // ),
 
     get("/connect", ctx => {
       ctx.session.counter = ctx.session.counter || 0;
