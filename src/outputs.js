@@ -1,3 +1,5 @@
+const CONFIG = require("./config");
+
 module.exports = {
   MP4: [
     "-movflags",
@@ -32,10 +34,10 @@ module.exports = {
   ],
   WEBM: [
     "-c:v",
-    "mjpeg",
-    "-b:v",
-    "300k",
-    "-f",
-    "rawvideos",
+    "libvpx",
+    "-r",
+    CONFIG.fps,
+    "-g",
+    CONFIG.fps,
   ],
 };
