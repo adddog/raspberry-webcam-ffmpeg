@@ -15,6 +15,8 @@ class FFMPEG {
         CONFIG.height}`,
       "-framerate",
       config.fps || CONFIG.fps,
+      "-r",
+      config.fps || CONFIG.fps,
     ];
   }
 
@@ -29,7 +31,7 @@ class FFMPEG {
       "-tune",
       "zerolatency",
       "-r",
-      "30",
+      CONFIG.fps,
       "-an",
     ];
   }

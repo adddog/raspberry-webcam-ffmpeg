@@ -32,6 +32,15 @@ function initPlayer() {
   // Attach player to the window to make it easy to access in the JS console.
   window.player = player;
 
+  // Increase the size of the gaps that Shaka Player will automatically jump:
+player.configure({
+  streaming: {
+    smallGapLimit: 30,
+    jumpLargeGaps: true,
+  },
+});
+
+
   // Listen for error events.
   player.addEventListener('error', onErrorEvent);
 

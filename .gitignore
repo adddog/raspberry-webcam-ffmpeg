@@ -20,6 +20,7 @@ build
 *.zip
 *.m4s
 *.mpd
+*.tmp
 *.3gp
 *.ffm
 .DS_Store
