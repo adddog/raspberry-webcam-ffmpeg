@@ -32,7 +32,8 @@ module.exports = {
         "-f",
         "mpegts",
     ],
-    DASH: [
+
+    DASH: () => [
         "-movflags",
         "+faststart+frag_keyframe+empty_moov",
         "-tune",
@@ -59,7 +60,7 @@ module.exports = {
         "-b:v",
         "600k",
         "-crf",
-        "24",
+        "30",
         "-minrate",
         "80k",
         "-maxrate",

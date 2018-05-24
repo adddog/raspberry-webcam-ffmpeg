@@ -16,7 +16,7 @@ const { WEBM, MP4, DASH, DASH2 } = require("./src/outputs");
 const start = ({ cameraAddr, ffserverStream }) => {
   Output.start({
     ...CONFIG,
-    outputOptions: [...DASH],
+    outputOptions: [...DASH()],
     output: [ffserverStream], //`"http://localhost:8090/mjpeg.ffm"`
   });
 
@@ -24,10 +24,10 @@ const start = ({ cameraAddr, ffserverStream }) => {
   Camera.start({
     src: cameraAddr, //"http://192.168.1.160:8080/video.jpeg",
     onFrame: buffer => {
-      let end = now()
-      console.log((end-start).toFixed(3))
+      //let end = now()
+      //console.log((end-start).toFixed(3))
       Output.frame(buffer);
-      start = end;
+      // start = end;
     },
   });
 };
@@ -68,6 +68,9 @@ server(
       if (!cameraAddr || !ffserverStream) {
         throw new Error("Reject");
       }
+
+      CONFIG.update(ctx.body)
+
       start({ cameraAddr, ffserverStream });
       return "started";
     }),
