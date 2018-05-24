@@ -1,5 +1,5 @@
 module.exports = {
   width: 240,
   height: 180,
-  fps: 25,
+  fps: 18,
 };
