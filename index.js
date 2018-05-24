@@ -1,3 +1,4 @@
+const now = require("performance-now")
 const server = require("server");
 const { get, post, socket } = server.router;
 const { error } = server.router;
@@ -19,10 +20,14 @@ const start = ({ cameraAddr, ffserverStream }) => {
     output: [ffserverStream], //`"http://localhost:8090/mjpeg.ffm"`
   });
 
+  let start = now()
   Camera.start({
     src: cameraAddr, //"http://192.168.1.160:8080/video.jpeg",
     onFrame: buffer => {
+      let end = now()
+      console.log((end-start).toFixed(3))
       Output.frame(buffer);
+      start = end;
     },
   });
 };
