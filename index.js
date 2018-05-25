@@ -64,14 +64,16 @@ server(
     }),
 
     post("/start", ctx => {
-      const { cameraAddr, ffserverStream } = ctx.body;
+      const json = JSON.parse(ctx.body);
+      const { cameraAddr, ffserverStream } = json
       if (!cameraAddr || !ffserverStream) {
         throw new Error("Reject");
       }
 
-      CONFIG.update(ctx.body)
+      CONFIG.update(json)
 
       start({ cameraAddr, ffserverStream });
+      return "started";
       return "started";
     }),
   ],
